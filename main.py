@@ -11,6 +11,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 import pandas as pd
 import openpyxl
+from collections import defaultdict
 
 
 def get_materials_list():
@@ -122,7 +123,7 @@ def create_excel_file(list_of_found_materials):
 
         df = pd.DataFrame(list_of_found_materials)
         base_dir = os.path.dirname(os.path.abspath(__file__))
-        output_path = os.path.join(base_dir, "Materials", "found_materials_2.xlsx")
+        output_path = os.path.join(base_dir, "Materials", "found_materials.xlsx")
         df.to_excel(output_path, index=False)
         print(f"Excel file created at {output_path}")
 
@@ -133,21 +134,51 @@ def create_excel_file(list_of_found_materials):
 
 def fill_excel_file(excel_file_path, list_of_found_materials):
     try:
-        wb = openpyxl.load_workbook(excel_file_path)
-        ws = wb.active
+        # Open or create workbook
+        try:
+            wb = openpyxl.load_workbook(excel_file_path)
+        except FileNotFoundError:
+            wb = openpyxl.Workbook()
+            # Remove the default "Sheet" if new file
+            wb.remove(wb.active)
 
-        for idx, material in enumerate(list_of_found_materials, start=2):
-            ws.cell(row=idx, column=1, value=material["name"])
-            ws.cell(row=idx, column=2, value=material["material"])
-            ws.cell(row=idx, column=3, value=material["price"])
-            ws.cell(row=idx, column=4, value=material["url"])
-            ws.cell(row=idx, column=5, value=material["promotion"])
+        # Group materials by "material"
+        grouped_materials = defaultdict(list)
+        for item in list_of_found_materials:
+            grouped_materials[item["material"]].append(item)
 
+        # Create one sheet per material
+        for material_type, items in grouped_materials.items():
+
+            sheet_name = str(material_type)[:31]  
+            
+            if sheet_name in wb.sheetnames:
+                del wb[sheet_name]
+            
+            ws = wb.create_sheet(title=sheet_name)
+
+            # Add header row
+            headers = ["Name", "Material", "Price", "URL", "Promotion"]
+            ws.append(headers)
+
+            # Fill rows with data
+            for item in items:
+                ws.append([
+                    item.get("name", ""),
+                    item.get("material", ""),
+                    item.get("price", ""),
+                    item.get("url", ""),
+                    item.get("promotion", "")
+                ])
+
+        # Save workbook
         wb.save(excel_file_path)
         print(f"Excel file updated at {excel_file_path}")
+        return True
 
     except Exception as e:
         print(f"Error filling Excel file: {e}")
+        return False
 
 def main():
     driver = setup_webdriver()
