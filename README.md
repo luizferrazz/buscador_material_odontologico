@@ -84,7 +84,6 @@ The Excel sheet name is limited to 31 characters (Excel limitation).
 Example sheet for "alginate":
 
 Name	Material	Price	URL	Promotion
-Alginate Fast Set	alginate	R$ 29.90	https://www.dentalcremer.com.br/...	No\n
 Alginate Chromatic	alginate	R$ 35.50	https://www.dentalcremer.com.br/...	15% Off
 
 📜 License
