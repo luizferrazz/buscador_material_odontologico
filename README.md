@@ -1,4 +1,4 @@
-#🦷 Dental Materials Scraper
+🦷 Dental Materials Scraper
 
 This project automates the process of searching dental materials on the Dental Cremer
  website using Selenium, extracts product information (name, material, price, URL, promotions), and exports the data into an Excel file grouped by material.
